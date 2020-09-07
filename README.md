@@ -1,1 +1,1 @@
-[![](https://github.com/docker-hub-tm/circleci-executors_molecule/workflows/docker%20build/badge.svg)](https://github.com/docker-hub-tm/circleci-executors_molecule/actions?query=workflow%3A%22docker+build%22)
+[![](https://github.com/docker-hub-tm/circleci-executors_molecule/workflows/build/badge.svg)](https://github.com/docker-hub-tm/circleci-executors_molecule/actions?query=workflow%3Abuild)

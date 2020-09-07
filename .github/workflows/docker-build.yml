@@ -1,6 +1,6 @@
 ---
-name: docker build
-on: push
+name: build
+on: [deployment, push]
 
 jobs:
   build:
@@ -23,3 +23,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: harupy/find-trailing-whitespace@56310d
+
+  lintAllTheThings:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: yaml-lint
+        uses: ibiqlik/action-yamllint@665205c
+        with:
+          config_file: .yamllint
