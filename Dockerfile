@@ -4,7 +4,7 @@ FROM python:3.8-slim
 RUN apt-get update \
   && mkdir -p /usr/share/man/man1 \
   && apt-get install -y \
-    git apt locales sudo openssh-client ca-certificates
+    apt ca-certificates curl git locales openssh-client sudo unzip
 
 # Add User
 RUN groupadd --gid 3434 circleci \
