@@ -15,8 +15,13 @@ RUN groupadd --gid 3434 circleci \
 # Install Docker
 RUN sudo -u circleci pip3 install --user docker
 
+# Install Selenium
+RUN sudo -u circleci pip3 install --user selenium
+
 # Install Molecule
-RUN sudo -u circleci pip3 install --user ansible boto boto3 molecule molecule-ec2
+RUN sudo -u circleci pip3 install --user ansible \
+                                         molecule \
+                                         molecule-docker
 
 USER circleci
 ENV PATH /home/circleci/.local/bin:/home/circleci/bin:${PATH}
