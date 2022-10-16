@@ -20,7 +20,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.CR_PAT}}
           registry: ghcr.io
-          repository: docker-hub-tm/circleci-executors_molecule/molecule
+          repository: docker-images-mamono210/circleci-executors_molecule/molecule
           dockerfile: ${{ matrix.molecule-version }}/Dockerfile
           tags: ${{ matrix.molecule-version }}
 
