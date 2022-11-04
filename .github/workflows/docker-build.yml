@@ -7,22 +7,32 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        molecule-version:
+        molecule-driver:
           - ec2
           - docker
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Push docker image to GitHub Packages
-        uses: docker/build-push-action@v1
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to GitHub Container registry
+        uses: docker/login-action@v2
         with:
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.CR_PAT}}
-          registry: ghcr.io
-          repository: docker-images-mamono210/circleci-executors/molecule
-          dockerfile: ${{ matrix.molecule-version }}/Dockerfile
-          tags: ${{ matrix.molecule-version }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          file: ${{ matrix.molecule-driver }}/Dockerfile
+          push: true
+          tags: ghcr.io/docker-images-mamono210/circleci-executors/molecule:${{ matrix.molecule-driver }}
 
   trailing-whitespace:
     name: Find Trailing Whitespace
