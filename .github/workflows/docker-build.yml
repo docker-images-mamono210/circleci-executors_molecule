@@ -27,12 +27,33 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.CR_PAT}}
 
-      - name: Build and push
+      - name: Build and export to Docker
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ${{ matrix.molecule-driver }}/Dockerfile
+          load: true
+          tags: molecule:preview
+
+      - name: Get Molecule version
+        id: molecule_version
+        run: |
+          tag=$(docker run --rm molecule:preview molecule --version | awk 'NR==1 {print $2}')
+          echo "tag=${tag}" >> $GITHUB_OUTPUT
+
+      - name: Build and push 1
         uses: docker/build-push-action@v3
         with:
           file: ${{ matrix.molecule-driver }}/Dockerfile
           push: true
-          tags: ghcr.io/docker-images-mamono210/circleci-executors/molecule:${{ matrix.molecule-driver }}
+          tags: ghcr.io/docker-images-mamono210/circleci-executors/molecule:${{ steps.molecule_version.outputs.tag }}-${{ matrix.molecule-driver }}
+
+      - name: Build and push 2
+        uses: docker/build-push-action@v3
+        with:
+          file: ${{ matrix.molecule-driver }}/Dockerfile
+          push: true
+          tags: ghcr.io/docker-images-mamono210/circleci-executors/molecule:latest-${{ matrix.molecule-driver }}
 
   trailing-whitespace:
     name: Find Trailing Whitespace
