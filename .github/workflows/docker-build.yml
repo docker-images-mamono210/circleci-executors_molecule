@@ -41,12 +41,18 @@ jobs:
           tag=$(docker run --rm molecule:preview molecule --version | awk 'NR==1 {print $2}')
           echo "tag=${tag}" >> $GITHUB_OUTPUT
 
+      - name: Get Molecule driver version
+        id: driver_version
+        run: |
+          tag=$(docker run --rm molecule:preview molecule --version | awk -F':' 'NR==4 {print $2}' | awk '{print $1}')
+          echo "tag=${tag}" >> $GITHUB_OUTPUT
+
       - name: Build and push 1
         uses: docker/build-push-action@v3
         with:
           file: ${{ matrix.molecule-driver }}/Dockerfile
           push: true
-          tags: ghcr.io/docker-images-mamono210/circleci-executors/molecule:${{ steps.molecule_version.outputs.tag }}-${{ matrix.molecule-driver }}
+          tags: ghcr.io/docker-images-mamono210/circleci-executors/molecule:${{ steps.molecule_version.outputs.tag }}_${{ matrix.molecule-driver }}-${{ steps.driver_version.outputs.tag }}
 
       - name: Build and push 2
         uses: docker/build-push-action@v3
