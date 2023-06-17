@@ -4,7 +4,7 @@ FROM python:3-slim
 RUN apt-get update \
   && mkdir -p /usr/share/man/man1 \
   && apt-get install -y \
-    apt ca-certificates curl git locales openssh-client rsync sudo unzip
+    apt ca-certificates curl git jq locales openssh-client rsync sudo unzip
 
 # Add User
 RUN groupadd circleci \
