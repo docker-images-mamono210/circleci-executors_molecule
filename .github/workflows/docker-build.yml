@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         molecule-driver:
-          - ec2
+          - default
           - docker
     steps:
       - name: Checkout
@@ -44,7 +44,13 @@ jobs:
       - name: Get Molecule driver version
         id: driver_version
         run: |
-          tag=$(docker run --rm molecule:preview molecule --version | awk -F':' 'NR==4 {print $2}' | awk '{print $1}')
+          version=$(docker run --rm molecule:preview molecule --version | awk -F':' 'NR==4 {print $2}' | awk '{print $1}')
+          if [ -z "$version" ];
+          then
+            tag=""
+          else
+            tag="_${version}"
+          fi
           echo "tag=${tag}" >> $GITHUB_OUTPUT
 
       - name: Build and push 1
@@ -52,7 +58,7 @@ jobs:
         with:
           file: ${{ matrix.molecule-driver }}/Dockerfile
           push: true
-          tags: ghcr.io/docker-images-mamono210/circleci-executors/molecule-${{ matrix.molecule-driver }}:${{ steps.molecule_version.outputs.tag }}_${{ steps.driver_version.outputs.tag }}
+          tags: ghcr.io/docker-images-mamono210/circleci-executors/molecule-${{ matrix.molecule-driver }}:${{ steps.molecule_version.outputs.tag }}${{ steps.driver_version.outputs.tag }}
 
       - name: Build and push 2
         uses: docker/build-push-action@v3
