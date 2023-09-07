@@ -19,7 +19,7 @@ RUN sudo -u circleci pip3 install --user selenium
 RUN sudo -u circleci pip3 install --user ansible \
                                          boto \
                                          boto3 \
-                                         molecule
+                                         molecule==5.1.0
 
 USER circleci
 ENV PATH /home/circleci/.local/bin:/home/circleci/bin:${PATH}
