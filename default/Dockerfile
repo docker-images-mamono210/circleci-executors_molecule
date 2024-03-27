@@ -13,13 +13,13 @@ RUN groupadd --gid 3434 circleci \
   && echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep
 
 # Install Selenium
-RUN sudo -u circleci pip3 install selenium
+RUN sudo pip3 install selenium
 
 # Install Molecule
-RUN sudo -u circleci pip3 install ansible \
-                                  boto \
-                                  boto3 \
-                                  molecule
+RUN sudo pip3 install ansible \
+                      boto \
+                      boto3 \
+                      molecule
 
 USER circleci
 ENV PATH /home/circleci/.local/bin:/home/circleci/bin:${PATH}
