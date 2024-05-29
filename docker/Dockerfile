@@ -12,9 +12,6 @@ RUN groupadd circleci \
   && echo 'circleci ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-circleci \
   && echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep
 
-# Install requests
-RUN sudo -u circleci pip3 install --user requests==2.31.0
-
 # Install Docker
 RUN sudo -u circleci pip3 install --user docker
 
@@ -27,6 +24,10 @@ RUN sudo -u circleci pip3 install --user ansible \
                                          molecule-docker \
                                          boto \
                                          boto3
+
+# Upgrade community.docker
+ansible-galaxy collection install community.docker --upgrade
+
 
 USER circleci
 ENV PATH /home/circleci/.local/bin:/home/circleci/bin:${PATH}
