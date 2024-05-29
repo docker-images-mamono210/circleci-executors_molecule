@@ -26,7 +26,7 @@ RUN sudo -u circleci pip3 install --user ansible \
                                          boto3
 
 # Upgrade community.docker
-ansible-galaxy collection install community.docker --upgrade
+RUN sudo -u circleci ansible-galaxy collection install community.docker --upgrade
 
 
 USER circleci
