@@ -26,8 +26,7 @@ RUN sudo -u circleci pip3 install --user ansible \
                                          boto3
 
 # Upgrade community.docker
-RUN sudo -u circleci ansible-galaxy collection install community.docker --upgrade
-
+RUN sudo -u circleci ansible-galaxy collection install community.docker:3.10.1
 
 USER circleci
 ENV PATH /home/circleci/.local/bin:/home/circleci/bin:${PATH}
