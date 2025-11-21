@@ -21,7 +21,7 @@ RUN sudo -u circleci pip3 install --user selenium
 # Install Molecule
 RUN sudo -u circleci pip3 install --user ansible \
                                          molecule \
-                                         molecule-docker \
+                                         molecule-plugins[docker] \
                                          boto \
                                          boto3
 
