@@ -64,19 +64,60 @@ jobs:
           name: Build and tag image
           command: |
             docker build -t molecule:tmp << parameters.molecule-driver >>
-            tag=$(docker run --rm molecule:tmp molecule --version | awk 'NR==1 {print $2}')
-            echo "export MOLECULE_TAG=$tag" >> $BASH_ENV
+      - run:
+          name: Compute tag (Molecule + python)
+          command: |
+            set -euo pipefail
+
+            # molecule version
+            MOLECULE_VER="$(docker run --rm molecule:tmp molecule --version | awk 'NR==1 {print $2}')"
+
+            # python version (例: "Python 3.11.8")
+            PY_FULL="$(docker run --rm molecule:tmp python --version | awk '{print $2}')"
+
+            # py major.minor (例: 3.11)
+            PY_MM="$(echo "$PY_FULL" | awk -F. '{print $1 "." $2}')"
+
+            PY_TAG_FULL="py${PY_FULL}"
+            PY_MM_TAG="py${PY_MM}"
+
+            TAG_FULL="${MOLECULE_VER}-${PY_TAG_FULL}"
+            TAG_MM="${MOLECULE_VER}-${PY_MM_TAG}"
+
+            echo "MOLECULE_VER=$MOLECULE_VER"
+            echo "PY_FULL=$PY_FULL"
+            echo "PY_MM=$PY_MM"
+            echo "TAG_FULL=$TAG_FULL"
+            echo "TAG_MM=$TAG_MM"
+
+            echo "export MOLECULE_VER=$MOLECULE_VER" >> $BASH_ENV
+            echo "export PY_FULL=$PY_FULL" >> $BASH_ENV
+            echo "export PY_MM=$PY_MM" >> $BASH_ENV
+            echo "export IMAGE_TAG_FULL=$TAG_FULL" >> $BASH_ENV
+            echo "export IMAGE_TAG_MM=$TAG_MM" >> $BASH_ENV
       - run:
           name: Push image with version tag
           command: |
+            set -euo pipefail
             source $BASH_ENV
-            docker tag molecule:tmp ghcr.io/docker-images-mamono210/circleci-executors/molecule-<< parameters.molecule-driver >>:$MOLECULE_TAG
-            docker push ghcr.io/docker-images-mamono210/circleci-executors/molecule-<< parameters.molecule-driver >>:$MOLECULE_TAG
+
+            IMAGE="ghcr.io/docker-images-mamono210/circleci-executors/molecule-<< parameters.molecule-driver >>"
+
+            docker tag molecule:tmp "${IMAGE}:${IMAGE_TAG_FULL}"
+            docker push "${IMAGE}:${IMAGE_TAG_FULL}"
+
+            docker tag molecule:tmp "${IMAGE}:${IMAGE_TAG_MM}"
+            docker push "${IMAGE}:${IMAGE_TAG_MM}"
       - run:
-          name: Push image with latest tag
+          name: Push image with latest-py tag (recommended)
           command: |
-            docker tag molecule:tmp ghcr.io/docker-images-mamono210/circleci-executors/molecule-<< parameters.molecule-driver >>:latest
-            docker push ghcr.io/docker-images-mamono210/circleci-executors/molecule-<< parameters.molecule-driver >>:latest
+            set -euo pipefail
+            source $BASH_ENV
+
+            IMAGE="ghcr.io/docker-images-mamono210/circleci-executors/molecule-<< parameters.molecule-driver >>"
+
+            docker tag molecule:tmp "${IMAGE}:latest"
+            docker push "${IMAGE}:latest"
   yamllint:
     executor: yamllint/default
     steps:
