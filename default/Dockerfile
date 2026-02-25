@@ -21,7 +21,7 @@ RUN sudo -u circleci pip3 install --user ansible \
                                          boto3 \
                                          molecule \
                                          selenium \
-                                         request \
+                                         requests \
                                          selenium
 
 USER circleci
