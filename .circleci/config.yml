@@ -65,36 +65,49 @@ jobs:
           command: |
             docker build -t molecule:tmp << parameters.molecule-driver >>
       - run:
-          name: Compute tag (Molecule + python)
+          name: Compute tag (Molecule + python + ansible-community)
           command: |
             set -euo pipefail
 
             # molecule version
             MOLECULE_VER="$(docker run --rm molecule:tmp molecule --version | awk 'NR==1 {print $2}')"
 
-            # python version (例: "Python 3.11.8")
+            # python version (e.g., "3.11.8")
             PY_FULL="$(docker run --rm molecule:tmp python --version | awk '{print $2}')"
-
-            # py major.minor (例: 3.11)
             PY_MM="$(echo "$PY_FULL" | awk -F. '{print $1 "." $2}')"
+
+            # ansible-community version (pip package "ansible")
+            # Get "Version: x.y.z" from pip show ansible
+            ANSIBLE_VER="$(docker run --rm molecule:tmp sh -lc "pip show ansible 2>/dev/null | awk '/^Version:/ {print \$2}'")"
+            if [ -z "${ANSIBLE_VER}" ]; then
+              echo "Failed to detect ansible-community version via: pip show ansible" >&2
+              echo "Hint: ensure 'ansible' is installed in the image (pip package)." >&2
+              exit 1
+            fi
 
             PY_TAG_FULL="py${PY_FULL}"
             PY_MM_TAG="py${PY_MM}"
+            ANS_TAG_FULL="ans${ANSIBLE_VER}"
 
-            TAG_FULL="${MOLECULE_VER}-${PY_TAG_FULL}"
-            TAG_MM="${MOLECULE_VER}-${PY_MM_TAG}"
+            # Full (fully pinned): molecule + python(patch) + ansible-community(patch)
+            TAG_FULL="${MOLECULE_VER}-${PY_TAG_FULL}-${ANS_TAG_FULL}"
+
+            # Compatibility (minor version track): molecule + python(major.minor) + ansible-community(major.minor)
+            TAG_MM="${MOLECULE_VER}-${PY_MM_TAG}-${ANS_TAG_FULL}"
 
             echo "MOLECULE_VER=$MOLECULE_VER"
             echo "PY_FULL=$PY_FULL"
             echo "PY_MM=$PY_MM"
+            echo "ANSIBLE_VER=$ANSIBLE_VER"
             echo "TAG_FULL=$TAG_FULL"
             echo "TAG_MM=$TAG_MM"
 
-            echo "export MOLECULE_VER=$MOLECULE_VER" >> $BASH_ENV
-            echo "export PY_FULL=$PY_FULL" >> $BASH_ENV
-            echo "export PY_MM=$PY_MM" >> $BASH_ENV
-            echo "export IMAGE_TAG_FULL=$TAG_FULL" >> $BASH_ENV
-            echo "export IMAGE_TAG_MM=$TAG_MM" >> $BASH_ENV
+            echo "export MOLECULE_VER=$MOLECULE_VER" >> "$BASH_ENV"
+            echo "export PY_FULL=$PY_FULL" >> "$BASH_ENV"
+            echo "export PY_MM=$PY_MM" >> "$BASH_ENV"
+            echo "export ANSIBLE_VER=$ANSIBLE_VER" >> "$BASH_ENV"
+            echo "export IMAGE_TAG_FULL=$TAG_FULL" >> "$BASH_ENV"
+            echo "export IMAGE_TAG_MM=$TAG_MM" >> "$BASH_ENV"
       - run:
           name: Push image with version tag
           command: |
